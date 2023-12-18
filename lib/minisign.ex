@@ -10,10 +10,10 @@ defmodule Minisign do
 
   @type public_key_input :: String.t | {:file, Path.t} | PublicKey.t
   @type signature_input :: String.t | {:file, Path.t} | Signature.t
-  @type message_input :: String.t | {:file, Path.t}
+  @type message_input :: binary | {:file, Path.t}
   @type reason :: :key_id_match | :signature | :global_signature
 
-  @spec verify(public_key_input, signature_input, message_input) :: :ok | {:invalid, reason} | {:error, any}
+  @spec verify(message_input, signature_input, public_key_input) :: :ok | {:invalid, reason} | {:error, any}
   @doc """
   verifies a signature, returning `:ok` if the signature is valid.
 
@@ -21,8 +21,14 @@ defmodule Minisign do
   reason why the signature failed to validate.
 
   if any of the inputs have failed, returns an `:error` tuple.
+
+  For the key or signature inputs you may provide Base64 encoded strings, or a
+  `{:file, path}` tuple to read from a file or a preparsed datastructure.
+
+  For the message input, you may either provide the raw binary or, a `{:file, path}`
+  tuple to read the message from the file.
   """
-  def verify(public_key, signature, message) do
+  def verify(message, signature, public_key) do
     with {:ok, public_key} <- marshal(public_key, PublicKey),
          {:ok, signature} <- marshal(signature, Signature),
          {:ok, message} <- marshal(message, nil) do
@@ -30,12 +36,12 @@ defmodule Minisign do
     end
   end
 
-  @spec verify!(public_key_input, signature_input, message_input) :: boolean
+  @spec verify!(message_input, signature_input, public_key_input) :: boolean
   @doc """
   verifies a signature, and raises if any of the inputs are invalid.
   """
-  def verify!(public_key, signature, message) do
-    case verify(public_key, signature, message) do
+  def verify!(message, signature, public_key) do
+    case verify(message, signature, public_key) do
       :ok -> true
       :invalid -> false
       {:error, error} -> raise error
