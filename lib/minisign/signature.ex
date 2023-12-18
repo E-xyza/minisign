@@ -1,4 +1,18 @@
 defmodule Minisign.Signature do
+  @moduledoc """
+  Datastructure representing a minisign signature.
+
+  fields: 
+
+  - `:algorithm`: always `:ED` (note the capitalization)
+  - `:trusted_comment`: (string) the trusted comment
+  - `:key_id`: (binary) 8 byte key id
+  - `:signature`: (binary) 64 byte signature
+  - `:global_signature`: (binary) 64 byte global signature
+
+  see https://jedisct1.github.io/minisign/#signature-format
+  """
+
   defstruct [:algorithm, :trusted_comment, :key_id, :signature, :global_signature]
 
   alias Minisign.ParseError
@@ -11,12 +25,22 @@ defmodule Minisign.Signature do
           global_signature: <<_::256>>
         }
 
+  @spec parse(String.t()) :: {:ok, t} | {:error, ParseError.t()}
+  @doc """
+  parses a signature string, and returns the resulting struct if it's valid.
+  """
   def parse(string) do
     string
     |> String.split("\n")
     |> get_parts
   end
 
+  @spec parse!(String.t()) :: t
+  @doc """
+  parses a signature string, or raises if the string is not a signature representation
+
+  see `parse/1`
+  """
   def parse!(string) do
     case parse(string) do
       {:ok, Signature} -> Signature

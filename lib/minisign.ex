@@ -1,4 +1,9 @@
 defmodule Minisign do
+  @moduledoc """
+  Elixir implementation of the Minisign signature verification format.
+
+  see https://jedisct1.github.io/minisign/
+  """
 
   alias Minisign.PublicKey
   alias Minisign.Signature
@@ -9,6 +14,14 @@ defmodule Minisign do
   @type reason :: :key_id_match | :signature | :global_signature
 
   @spec verify(public_key_input, signature_input, message_input) :: :ok | {:invalid, reason} | {:error, any}
+  @doc """
+  verifies a signature, returning `:ok` if the signature is valid.
+
+  if the signature is invalid, returns an `:invalid` tuple indicating the
+  reason why the signature failed to validate.
+
+  if any of the inputs have failed, returns an `:error` tuple.
+  """
   def verify(public_key, signature, message) do
     with {:ok, public_key} <- marshal(public_key, PublicKey),
          {:ok, signature} <- marshal(signature, Signature),
@@ -18,6 +31,9 @@ defmodule Minisign do
   end
 
   @spec verify!(public_key_input, signature_input, message_input) :: boolean
+  @doc """
+  verifies a signature, and raises if any of the inputs are invalid.
+  """
   def verify!(public_key, signature, message) do
     case verify(public_key, signature, message) do
       :ok -> true
@@ -45,5 +61,7 @@ defmodule Minisign do
       true ->
         :ok
     end
+  rescue
+    a in ArgumentError -> {:error, a}
   end
 end

@@ -1,4 +1,16 @@
 defmodule Minisign.PublicKey do
+  @doc """
+  Public key datastructure for minisign.
+
+  fields:
+
+  - `:algorithm`: always `:Ed`
+  - `:key_id`: 8 byte key id
+  - `:key`: 32 byte public key
+
+  see https://jedisct1.github.io/minisign/#public-key-format
+  """
+
   defstruct [:algorithm, :key_id, :key]
 
   alias Minisign.ParseError
@@ -10,12 +22,23 @@ defmodule Minisign.PublicKey do
         }
 
   @spec parse(String.t()) :: {:ok, t} | {:error, ParseError.t()}
+  @doc """
+  parses a public key string.  Note that the untrusted comment field is considered
+  optional, as many sources will include a public key as a simple base64 hash with
+  no comment.
+  """
   def parse(string) do
     string
     |> String.split("\n")
     |> parse_parts()
   end
 
+  @spec parse!(String.t()) :: t
+  @doc """
+  parses a public key string, or raises if the string is not a public key representation
+
+  see `parse/1`
+  """
   def parse!(string) do
     case parse(string) do
       {:ok, private_key} -> private_key
