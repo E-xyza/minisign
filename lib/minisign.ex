@@ -8,12 +8,13 @@ defmodule Minisign do
   alias Minisign.PublicKey
   alias Minisign.Signature
 
-  @type public_key_input :: String.t | {:file, Path.t} | PublicKey.t
-  @type signature_input :: String.t | {:file, Path.t} | Signature.t
-  @type message_input :: binary | {:file, Path.t}
+  @type public_key_input :: String.t() | {:file, Path.t()} | PublicKey.t()
+  @type signature_input :: String.t() | {:file, Path.t()} | Signature.t()
+  @type message_input :: binary | {:file, Path.t()}
   @type reason :: :key_id_match | :signature | :global_signature
 
-  @spec verify(message_input, signature_input, public_key_input) :: :ok | {:invalid, reason} | {:error, any}
+  @spec verify(message_input, signature_input, public_key_input) ::
+          :ok | {:invalid, reason} | {:error, any}
   @doc """
   verifies a signature, returning `:ok` if the signature is valid.
 
@@ -57,13 +58,23 @@ defmodule Minisign do
 
   defp do_verify(pk, sg, msg) do
     digest = :crypto.hash(:blake2b, msg)
+
     cond do
-      sg.key_id != pk.key_id -> 
+      sg.key_id != pk.key_id ->
         {:invalid, :key_id_match}
+
       !:crypto.verify(:eddsa, :none, {:digest, digest}, sg.signature, [pk.key, :ed25519]) ->
         {:invalid, :signature}
-      !:crypto.verify(:eddsa, :none, {:digest, sg.signature <> sg.trusted_comment}, sg.global_signature, [pk.key, :ed25519]) ->
+
+      !:crypto.verify(
+        :eddsa,
+        :none,
+        {:digest, sg.signature <> sg.trusted_comment},
+        sg.global_signature,
+        [pk.key, :ed25519]
+      ) ->
         {:invalid, :global_signature}
+
       true ->
         :ok
     end

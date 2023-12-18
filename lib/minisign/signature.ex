@@ -56,14 +56,16 @@ defmodule Minisign.Signature do
        ]) do
     with {{:ok, <<"ED", key_id::binary-size(8), signature::binary-size(64)>>}, :s} <-
            {Base.decode64(encoded_signature), :s},
-         {{:ok, <<global_signature::binary-size(64)>>}, :g} <- {Base.decode64(encoded_global_signature), :g} do
-      {:ok, %__MODULE__{
-        algorithm: :ED,
-        trusted_comment: trusted_comment,
-        key_id: key_id,
-        signature: signature,
-        global_signature: global_signature
-      }}
+         {{:ok, <<global_signature::binary-size(64)>>}, :g} <-
+           {Base.decode64(encoded_global_signature), :g} do
+      {:ok,
+       %__MODULE__{
+         algorithm: :ED,
+         trusted_comment: trusted_comment,
+         key_id: key_id,
+         signature: signature,
+         global_signature: global_signature
+       }}
     else
       {:error, :s} ->
         {:error, %ParseError{comment: "Invalid base64 encoding of signature", parser: __MODULE__}}

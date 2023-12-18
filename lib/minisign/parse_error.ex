@@ -1,5 +1,5 @@
 defmodule Minisign.ParseError do
-  @moduledoc false
+  @moduledoc ""
   defexception [:comment, :parser, :ref]
 
   alias Minisign.Signature

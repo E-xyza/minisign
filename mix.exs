@@ -9,6 +9,7 @@ defmodule Minisign.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
+      docs: docs()
     ]
   end
 
@@ -35,6 +36,13 @@ defmodule Minisign.MixProject do
         "GitHub" => "https://github.com/E-xyza/minisign",
         "Minisign" => "https://jedisct1.github.io/minisign/"
       }
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Minisign",
+      extras: ["README.md"]
     ]
   end
 end
